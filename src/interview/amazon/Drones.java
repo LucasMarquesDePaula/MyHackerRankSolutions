@@ -71,7 +71,7 @@ public class Drones {
             this.next = next;
         }
     }
-
+   
     private static class DroneList {
 
         private final int maxSize;
@@ -121,19 +121,21 @@ public class Drones {
             }
 
             try {
-                // Find node's position
+                // Find node's position and add it to the list
                 DroneNode position = findPosition(node);
                 this.add(node, position.getPrev(), position);
 
+                // If new-drone's flight range is greater than the first, set the first as the new
                 if (this.first.getDrone().getFlightRange() < node.getDrone().getFlightRange()) {
                     this.first = node;
                 }
 
+                // If new-drone's flight range is greater than the first, set the first as the new
                 if (this.last.getDrone().getFlightRange() > node.getDrone().getFlightRange()) {
                     this.last = node;
                 }
             } catch (PositionNotFoudException ignored) {
-
+                // If position wasn't found ignore exception
             }
         }
 
@@ -145,11 +147,15 @@ public class Drones {
          * @param next the next node
          */
         public void add(DroneNode node, DroneNode prev, DroneNode next) {
+            // node points to the list
             node.setPrev(prev);
             node.setNext(next);
+            
+            // list points to the node
             prev.setNext(node);
             next.setPrev(node);
-
+            
+            // trigger event
             this.added(node);
         }
 
@@ -185,12 +191,16 @@ public class Drones {
                 this.first = node.getNext();
             }
             // Remove node from list
+            
+            // List do not points to the node anymore
             node.getPrev().setNext(node.getNext());
             node.getNext().setPrev(node.getPrev());
 
+            // Node do not points to the list anymore
             node.setPrev(null);
             node.setNext(null);
 
+            // Trigger event
             this.removed();
         }
 
@@ -216,13 +226,15 @@ public class Drones {
         public DroneNode findPosition(DroneNode node) throws PositionNotFoudException {
             Drone drone = node.getDrone();
 
+            // ** OPTIMIZATION
             // If node's flight range is smallest then the last-node's flight range 
             if (this.last.getDrone().getFlightRange() > node.getDrone().getFlightRange()) {
                 // if list is full so it won't be added
                 if (this.getMaxSize() == this.getSize()) {
                     throw new PositionNotFoudException();
                 }
-
+                
+                // Otherwise, its position must be the end of the list
                 return this.first;
             }
 
@@ -270,9 +282,14 @@ public class Drones {
         DroneList greatestRange = new DroneList(numberOfRequiredDrones);
 
         for (Drone drone : drones) {
-            // If drone is not in mainteinance
-            if (!inMaintenanceDrones.contains(drone.getId())) {
+            Integer id = drone.getId();
+            if (!inMaintenanceDrones.contains(id)) {
+                // If drone is not in mainteinance
                 greatestRange.add(drone);
+            } else {
+                // Else, remove it from the list because it is not more necessary
+                // I hope it leads the algorithm to be faster
+                inMaintenanceDrones.remove(id);
             }
         }
 
