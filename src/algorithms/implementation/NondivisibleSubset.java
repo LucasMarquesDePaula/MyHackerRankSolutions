@@ -18,8 +18,7 @@ public class NondivisibleSubset {
         Arrays.fill(remainders, 0);
 
         for (int i : arr) {
-            int remain = i % k;
-            remainders[i % k]++;
+            remainders[remain]++;
         }
 
         int count = 0;
